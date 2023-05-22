@@ -105,6 +105,8 @@ const addArticle = async (req, res) => {
                 res.then(async ({ secure_url }) => {
                     console.log(secure_url);
                     const includeUrl = await Article.findOneAndUpdate({ paragraphOne: req.body.paragraphOne }, { "$push": { "image": secure_url } });
+
+                    res.status(StatusCodes.CREATED).json(getPopulated);
                     console.log("index is--" + index)
                     // if (index == 1) {
                     //   const includeUrlTwo = await Article.findOneAndUpdate({ paragraphOne: req.body.paragraphOne }, { imageTwo: secure_url });
@@ -141,7 +143,7 @@ const addArticle = async (req, res) => {
         })
         console.log(6)
         // console.log(fake)
-        res.status(StatusCodes.CREATED).json(getPopulated);
+
     } catch (error) {
         console.log(error);
         res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

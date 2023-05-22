@@ -106,6 +106,7 @@ const addMessage = async (req, res) => {
           //   const includeUrlTwo = await Message.findOneAndUpdate({ paragraphOne: req.body.paragraphOne }, { imageTwo: secure_url });
           //   console.log("updated imageTwo field to " + includeUrlTwo.imageTwo)
           // }
+          res.status(StatusCodes.CREATED).json(getPopulated);
           console.log("updated image field to " + includeUrl.image)
 
           console.log(5)
@@ -136,7 +137,7 @@ const addMessage = async (req, res) => {
     })
     console.log(6)
     console.log(fake)
-    res.status(StatusCodes.CREATED).json(getPopulated);
+
   } catch (error) {
     console.log(error);
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
