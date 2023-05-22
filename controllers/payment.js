@@ -72,7 +72,7 @@ const verifyPaymentCallback = async (req, res) => {
         // Verify the transaction
         const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
             headers: {
-                Authorization: `Bearer sk_test_c13719e08c8180e9dd5635f8086b06af0038e23c`,
+                Authorization: `Bearer ${process.env.paystack_test_secret_key}`,
             },
         });
 
