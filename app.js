@@ -77,7 +77,7 @@ app.use(
 app.use(express.json());
 app.use(helmet());
 app.use(cors({
-  origin: ['https://variant-d.netlify.app', 'https://binary-options-admin.vercel.app', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000']
+  origin: ['https://mt-of-mercy.netlify.app/', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000']
 }));
 app.use(xss());
 
@@ -150,7 +150,7 @@ const cloud = process.env.CLOUD_URI;
 
 const start = async () => {
   try {
-    await connectDB(local);
+    await connectDB(cloud);
     // admin.watch()
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)
