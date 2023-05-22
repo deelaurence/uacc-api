@@ -11,11 +11,12 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequest, NotFound } = require("../errors/customErrors");
 const articleM = require('../models/ArticleM');
 let uniqueId = 0
-console.log("cloud name " + process.env.cloud_name)
-console.log(" apikey " + process.env.api_key)
-console.log("api secret " + process.env.api_secret)
+
 const addArticle = async (req, res) => {
     console.log(1)
+    console.log("cloud name " + process.env.cloud_name)
+    console.log("apikey " + process.env.api_key)
+    console.log("api secret " + process.env.api_secret)
     try {
         // console.log(req.body.pictures.rawFile.path)
 
