@@ -140,7 +140,7 @@ const addArticle = async (req, res) => {
             }
         })
         console.log(6)
-        console.log(fake)
+        // console.log(fake)
         res.status(StatusCodes.CREATED).json(getPopulated);
     } catch (error) {
         console.log(error);
