@@ -100,9 +100,9 @@ const addArticle = async (req, res) => {
                     api_key: process.env.api_key,
                     api_secret: process.env.api_secret
                 });
-                const res = cloudinary.uploader.upload(`data:image/webp;base64,${stringed}`, { public_id: fileName })
+                const cloudinary_response = cloudinary.uploader.upload(`data:image/webp;base64,${stringed}`, { public_id: fileName })
                 console.log(4)
-                res.then(async ({ secure_url }) => {
+                cloudinary_response.then(async ({ secure_url }) => {
                     console.log(secure_url);
                     const includeUrl = await Article.findOneAndUpdate({ paragraphOne: req.body.paragraphOne }, { "$push": { "image": secure_url } });
 
