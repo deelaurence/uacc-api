@@ -1,17 +1,20 @@
 require("dotenv").config();
 const paystack = require('paystack')(process.env.paystack_test_secret_key);
+const User = require('../models/UserModel')
 
 const chargePayment = async (req, res) => {
     try {
         // Create a new transaction
+        const userId = req.decoded.id
+        const user = await User.findOne({ _id: userId })
         const transaction = await paystack.transaction.initialize({
             amount: req.body.amount, // Amount in kobo (100000 kobo = ₦1,000)
-            email: req.body.email,
+            email: user.email,
         });
         console.log(req.headers)
         console.log(transaction)
         // Redirect the customer to the payment page
-        res.redirect(transaction.data.authorization_url);
+        res.json({ redirect: transaction.data.authorization_url });
     } catch (error) {
         console.error('Payment error:', error);
         res.status(500).send('Payment error');

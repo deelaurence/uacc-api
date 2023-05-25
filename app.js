@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const express = require("express");
 const app = express();
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 const helmet = require("helmet");
 const cors = require("cors");
 const xss = require("xss-clean");
@@ -42,6 +43,7 @@ const User = require('./models/UserModel')
 
 
 app.use(morgan('dev'))
+app.use(cookieParser())
 // app.use(express.bodyParser({ limit: '50mb' }))
 //auth middlewares
 const auth = require("./middleware/authentication");
@@ -77,7 +79,8 @@ app.use(
 app.use(express.json());
 app.use(helmet());
 app.use(cors({
-  origin: ['https://mt-of-mercy.netlify.app', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000']
+  origin: ['https://mt-of-mercy.netlify.app', 'https://checkout.paystack.com', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  credentials: true
 }));
 app.use(xss());
 
@@ -108,7 +111,7 @@ app.get('/', (req, res) => {
 // app.post('/testpay', chargePayment)
 // app.get('/paystack/callback', verifyPayment)
 
-app.use('/paystack', paymentRoutes)
+app.use('/paystack', auth, paymentRoutes)
 
 app.get('/testuser', adminAuthMiddleware, async (req, res) => {
   try {
