@@ -26,7 +26,7 @@ const register = async (req, res) => {
     const link = `${process.env.SERVER_URL}/auth/verify-mail/${token}`
     const mailStatus = await sendMail(req.body.email, req.body.name, link)
     if (!mailStatus) {
-      throw new InternalServerError("Something went wrong while trying to send verification email")
+      throw new InternalServerError("Something went wrong while trying to send verification email, try again later")
     }
     res
       .status(StatusCodes.CREATED)
