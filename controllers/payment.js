@@ -8,8 +8,9 @@ const chargePayment = async (req, res) => {
         const userId = req.decoded.id
         const user = await User.findOne({ _id: userId })
         const transaction = await paystack.transaction.initialize({
-            amount: req.body.amount, // Amount in kobo (100000 kobo = ₦1,000)
+            amount: req.body.amount * 100, // Amount in kobo (100000 kobo = ₦1,000)
             email: user.email,
+            description: "tithe"
         });
         console.log(req.headers)
         console.log(transaction)
