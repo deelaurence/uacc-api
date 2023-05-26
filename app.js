@@ -103,7 +103,7 @@ app.use("/auth", auth, modifyUserRoutes);
 // app.use('/docs', swaggerUI.serve, swaggerUI.setup(docs));
 app.use("/admin/auth", adminAuth);
 app.get('/', (req, res) => {
-  res.json({ welcome: 'binary options' })
+  res.json({ welcome: 'uacc mt of mercy' })
 })
 
 // const { chargePayment, verifyPayment } = require('./controllers/payment')
