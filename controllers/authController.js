@@ -103,5 +103,10 @@ const login = async (req, res) => {
     console.log(message);
   }
 };
+const logout = (req, res) => {
+  res.clearCookie('token', { httpOnly: true });
+  res.json({ message: "logged out" });
+}
 
-module.exports = { register, login, verifyEmail, deleteUser };
+
+module.exports = { register, login, logout, verifyEmail, deleteUser };
