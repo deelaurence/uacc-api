@@ -92,7 +92,7 @@ const login = async (req, res) => {
       throw new Unauthenticated("Verify your email")
     }
     const token = user.generateJWT(process.env.JWT_SECRET);
-    res.cookie('token', token, { httpOnly: true });
+    res.cookie('token', token, { httpOnly: true, sameSite:"none" });
     res.status(StatusCodes.OK).json({ ...user._doc, token: token });
   } catch (error) {
     const { message, statusCode } = error;
