@@ -10,7 +10,9 @@ const chargePayment = async (req, res) => {
         const transaction = await paystack.transaction.initialize({
             amount: req.body.amount * 100, // Amount in kobo (100000 kobo = ₦1,000)
             email: user.email,
-            description: "tithe"
+            metadata: {
+                description: req.body.description
+            }
         });
         console.log(req.headers)
         console.log(transaction)
@@ -92,7 +94,7 @@ const verifyPaymentCallback = async (req, res) => {
             console.log('Payment not successful');
         }
 
-        res.send(response.data);
+        res.redirect("https://mt-of-mercy.netlify.app");
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).send('Verification error');
