@@ -88,13 +88,17 @@ const verifyPaymentCallback = async (req, res) => {
             // Do something here (e.g., update your database, provide access to content, etc.)
             // res.json({message:"payment sucessful"})
             console.log('Payment successful');
+            console.log(response.data)
+            const amount = 12345
+            const description = "testing the payment options"
+            const reference = "62458huhgwij"
+            res.redirect(`https://mt-of-mercy.netlify.app/receipt?amount=${amount}&description=${description}&reference=${reference}`);
         } else {
             // Payment is not successful
             // Do something here (e.g., display an error message, handle failed payment)
             console.log('Payment not successful');
         }
 
-        res.redirect("https://mt-of-mercy.netlify.app");
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).send('Verification error');
