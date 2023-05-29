@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+console.log(process.env.MAIL_EMAIL)
 // async..await is not allowed in global scope, must use a wrapper
 async function sendMail(email, fullname, link) {
     try {

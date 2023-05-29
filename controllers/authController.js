@@ -6,6 +6,7 @@ const generator = require('generate-serial-number')
 const serialNumber = generator.generate(1)
 const jwt = require('jsonwebtoken')
 const { sendMail } = require('../utils/mailer')
+const { sendBrevoMail } = require('../utils/brevomail')
 const {
   BadRequest,
   NotFound,
@@ -24,9 +25,9 @@ const register = async (req, res) => {
     const token = newUser.generateJWT(process.env.JWT_SECRET);
 
     const link = `${process.env.SERVER_URL}/auth/verify-mail/${token}`
-    const mailStatus = await sendMail(req.body.email, req.body.name, link)
+    const mailStatus = await sendBrevoMail(req.body.email, req.body.name, link)
     console.log(mailStatus)
-    if (!mailStatus) {
+    if (mailStatus != 201) {
       await User.findOneAndDelete({ email: req.body.email })
       throw new InternalServerError("Something went wrong while trying to send verification email, try again later")
     }
@@ -41,7 +42,7 @@ const register = async (req, res) => {
       return;
     }
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-    console.log(StatusCodes.BAD_REQUEST, error.message);
+    console.log(StatusCodes.BAD_REQUEST, error);
   }
 };
 console.log(process.env.CLIENT_URL)
