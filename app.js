@@ -62,6 +62,7 @@ const adminRoutes = require('./routes/adminRoute')
 const clientRoutes = require('./routes/clientRoute')
 const clientArticleRoutes = require('./routes/clientArticleRoute')
 const paymentRoutes = require('./routes/payment')
+const paymentVerifyRoutes = require('./routes/paymentVerify')
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
 const connectDB = require("./db/connect");
@@ -112,6 +113,7 @@ app.get('/', (req, res) => {
 // app.get('/paystack/callback', verifyPayment)
 
 app.use('/paystack', auth, paymentRoutes)
+app.use('/verify', paymentRoutes)
 
 app.get('/testuser', adminAuthMiddleware, async (req, res) => {
   try {
