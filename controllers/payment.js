@@ -1,6 +1,7 @@
 require("dotenv").config();
 const paystack = require('paystack')(process.env.paystack_test_secret_key);
 const User = require('../models/UserModel')
+const Payment = require('../models/Payment')
 
 const chargePayment = async (req, res) => {
     try {
@@ -32,7 +33,7 @@ function verifyWebhookSignature(headerSignature, requestPayload) {
         .digest('hex');
     return headerSignature === computedSignature;
 }
-const webhookVerification = (req, res) => {
+const webhookVerification = async (req, res) => {
     // Verify the signature
     const headerSignature = req.headers['x-paystack-signature'];
     const isSignatureValid = verifyWebhookSignature(headerSignature, JSON.stringify(req.body));
@@ -47,10 +48,21 @@ const webhookVerification = (req, res) => {
     const eventData = event.data;
 
     console.log(eventData)
+    const payloadEmail = eventData.customer.email
+    const payloadDescription = eventData.metadata.description
+    const payloadReference = eventData.reference
+    const payloadAmount = eventData.amount
+    const payloadAuth = eventData.authorization.authorization_code
     // Handle the event based on the event type
     if (eventType === 'charge.success') {
-
+        await User.findOneAndUpdate({ email: payloadEmail }, { authCode: payloadAuth })
         // save eventData to db
+        await Payment.create({
+            owner: payloadEmail,
+            amount: payloadAmount,
+            description: payloadDescription,
+            reference: payloadReference,
+        })
     }
     else if (eventType === 'charge.failed') {
         // Handle failed payment event

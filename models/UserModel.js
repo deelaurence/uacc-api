@@ -37,6 +37,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "point-believe-twenty-open-rail-pool"
   },
+  authCode: {
+    type: String
+  }
 
 },
   { timestamps: true });

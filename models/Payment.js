@@ -1,21 +1,26 @@
-const { mongoose } = require('mongoose');
+const mongoose = require('mongoose');
+
 const paymentSchema = new mongoose.Schema({
-    full_name: {
+    owner: {
         type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
+        required: true
     },
     amount: {
         type: Number,
-        required: true,
+        required: true
     },
+    description: {
+        type: String,
+        required: true
+    }
+    ,
     reference: {
         type: String,
         required: true
     }
 });
+
 const Payment = mongoose.model('Payment', paymentSchema);
-module.exports = { Payment }
+
+
+module.exports = Payment 
