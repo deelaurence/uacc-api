@@ -67,7 +67,7 @@ const webhookVerification = async (req, res) => {
             owner: payloadEmail,
             id: uuidv4(),
             name: payloadName,
-            date: dateFormat(),
+            date: formatDate(),
             status: "Success",
             amount: payloadAmount / 100,
             description: payloadDescription,
