@@ -52,6 +52,7 @@ const adminAuthMiddleware = require("./middleware/admin-auth");
 //routes
 const MessageRoutes = require('./routes/messageR')
 const ArticleRoutes = require('./routes/articleR')
+const AdminPaymentRoutes = require('./routes/adminPayment')
 const notificationRoutes = require('./routes/notificationRoute')
 const withdrawalRoutes = require('./routes/withdrawalR')
 const authRoutes = require("./routes/authRoute");
@@ -98,6 +99,7 @@ app.use("/articles", clientArticleRoutes);
 // app.use("/notification", adminAuth, notificationRoutes);
 app.use("/message", adminAuthMiddleware, MessageRoutes);
 app.use("/article", adminAuthMiddleware, ArticleRoutes);
+app.use("/payment", adminAuthMiddleware, AdminPaymentRoutes);
 // app.use("/withdrawal", auth, withdrawalRoutes);
 // app.use("/upload", uploadRoutes);
 app.use("/auth", auth, modifyUserRoutes);

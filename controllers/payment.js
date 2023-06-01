@@ -1,4 +1,6 @@
 require("dotenv").config();
+const { v4: uuidv4 } = require('uuid');
+const { formatDate } = require('../utils/dateFormat')
 const paystack = require('paystack')(process.env.paystack_test_secret_key);
 const User = require('../models/UserModel')
 const Payment = require('../models/Payment')
@@ -12,7 +14,8 @@ const chargePayment = async (req, res) => {
             amount: req.body.amount * 100, // Amount in kobo (100000 kobo = ₦1,000)
             email: user.email,
             metadata: {
-                description: req.body.description
+                description: req.body.description,
+                name: user.name
             }
         });
         console.log(req.headers)
@@ -52,25 +55,52 @@ const webhookVerification = async (req, res) => {
     const payloadDescription = eventData.metadata.description
     const payloadReference = eventData.reference
     const payloadAmount = eventData.amount
+    const payloadName = eventData.metadata.name
     const payloadAuth = eventData.authorization.authorization_code
     // Handle the event based on the event type
     if (eventType === 'charge.success') {
-        await User.findOneAndUpdate({ email: payloadEmail }, { authCode: payloadAuth })
+        if (payloadAuth) {
+            await User.findOneAndUpdate({ email: payloadEmail }, { authCode: payloadAuth })
+        }
         // save eventData to db
         await Payment.create({
             owner: payloadEmail,
-            amount: payloadAmount,
+            id: uuidv4(),
+            name: payloadName,
+            date: dateFormat(),
+            status: "Success",
+            amount: payloadAmount / 100,
             description: payloadDescription,
             reference: payloadReference,
         })
     }
     else if (eventType === 'charge.failed') {
+        await Payment.create({
+            owner: payloadEmail,
+            id: uuidv4(),
+            name: payloadName,
+            date: dateFormat(),
+            status: "Failed",
+            amount: payloadAmount / 100,
+            description: payloadDescription,
+            reference: payloadReference,
+        })
         // Handle failed payment event
         console.log('Payment failed.');
         // Take appropriate actions like notifying the user, logging the failure, etc.
     } else if (eventType === 'charge.refunded') {
         // Handle refunded payment event
         console.log('Payment refunded.');
+        await Payment.create({
+            owner: payloadEmail,
+            id: uuidv4(),
+            name: payloadName,
+            date: dateFormat(),
+            status: "Refunded",
+            amount: payloadAmount / 100,
+            description: payloadDescription,
+            reference: payloadReference,
+        })
         // Update your database or trigger any necessary actions related to the refund process
     }
     else {
@@ -103,8 +133,9 @@ const verifyPaymentCallback = async (req, res) => {
             console.log(response.data)
             const amount = response.data.data.amount / 100
             const description = response.data.data.metadata.description
+            const name = response.data.data.metadata.name
             const reference = response.data.data.reference
-            res.redirect(`https://mt-of-mercy.netlify.app/#/receipt?amount=${amount}&description=${description}&reference=${reference}`);
+            res.redirect(`https://mt-of-mercy.netlify.app/#/receipt?amount=${amount}&description=${description}&reference=${reference}&name=${name}`);
         } else {
             // Payment is not successful
             // Do something here (e.g., display an error message, handle failed payment)
@@ -115,118 +146,54 @@ const verifyPaymentCallback = async (req, res) => {
         console.error('Verification error:', error);
         res.status(500).send('Verification error');
     }
-
 }
-module.exports = { chargePayment, verifyPaymentCallback, webhookVerification }
-// //paystack config
-// const { Payment } = require('../models/Payment')
-// const request = require('request');
-// const _ = require('lodash');
-// const { initializePayment, verifyPayment } = require('./paymentConfig')(request);
-// const paymentRequest = (req, res) => {
-//     try {
-//         req.body.email = req.decoded.email
-//         console.log(req.body)
-//         if (!req.body.amount && !req.body.full_name && !req.body.email) {
-//             return res.json({ message: "email, amount or name missing" })
-//         }
-//         // return
-//         const form = _.pick(req.body, ['amount', 'email', 'full_name']);
-//         form.metadata = {
-//             full_name: form.full_name
-//         }
-//         form.amount *= 100;
 
-//         initializePayment(form, (error, body) => {
-//             try {
-//                 if (error) {
-//                     //handle errors
-//                     console.log(error);
-//                     return res.json({ error })
-//                     return;
-//                 }
-//                 response = JSON.parse(body);
-//                 console.log(response)
-//                 // return
-//                 res.json({ link: response.data.authorization_url })
-//             }
-//             catch (error) {
-//                 res.json({ error })
-//             }
-//         });
-//     } catch (error) {
-//         res.json({ error })
-//     }
-// }
+const getSinglePayment = async (req, res) => {
+    try {
+        const PaymentId = req.params.id
+        let query = {
+            _id: PaymentId,
+        }
+        //admin requests have req.decoded
+        if (req.decoded) {
+            query = { id: PaymentId }
+        }
+        const singlePayment = await Payment.findOne(query)
+        if (!singlePayment) {
+            throw new NotFound(
+                `no Message with id ${PaymentId} `
+            );
+        }
+        res.status(200).json(singlePayment);
+    } catch (error) {
+        console.log(error.message)
+        res.status(400).json({ message: error.message });
+    }
+};
+const getPayments = async (req, res) => {
+    try {
 
-// const verifyRequest = (req, res) => {
-//     try {
-//         const ref = req.query.reference;
-//         verifyPayment(ref, (error, body) => {
-//             if (error) {
-//                 //handle errors appropriately
-//                 console.log(error)
-//                 return res.json({ message: "payment verification" });
-//             }
-//             response = JSON.parse(body);
+        let query = {}
+        console.log(req.decoded)
+        //Requests coming from admin passses thru middleware
+        if (req.decoded) {
+            query = { owner: req.decoded.id }
+        }
 
-//             const data = _.at(response.data, ['reference', 'amount', 'customer.email', 'metadata.full_name']);
 
-//             [reference, amount, email, full_name] = data;
-//             let newPayment = { reference, amount, email, full_name }
-//             const payment = new Payment(newPayment)
-//             payment.save().then((payment) => {
-//                 if (!payment) {
-//                     return res.json({ message: "something happened" });
-//                 }
-//                 res.status(201).json(payment);
-//             }).catch((e) => {
-//                 res.json({ message: e });
-//             })
-//         })
-//     } catch (error) {
-//         res.json({ error })
-//     }
-// }
-// const getReceipt = (req, res) => {
-//     try {
-//         const id = req.params.id;
-//         Payment.findById(id).then((payment) => {
-//             if (!payment) {
-//                 //handle error when the payment is not found
-//                 res.redirect('/error')
-//             }
-//             res.render('success.pug', { payment });
-//         }).catch((e) => {
-//             res.redirect('/error')
-//         })
-//     }
-//     catch (error) {
-//         res.json({ error })
-//     }
-// }
-// const getPayments = async (req, res) => {
-//     try {
-//         const transactions = await Payment.find({})
-//         if (transactions < 1) {
-//             return res.json({ message: "no payments yet" })
-//         }
-//         res.json(transactions)
-//     } catch (error) {
-//         res.json({ error })
-//     }
-// }
-// const getUserPayment = async (req, res) => {
-//     try {
-//         const transaction = await Payment.find({ email: req.decoded.email })
-//         if (!transaction) {
-//             return res.json({ message: "no payments yet" })
-//         }
-//         res.json(transaction)
-//     } catch (error) {
-//         res.json({ error })
-//     }
-// }
-
-// module.exports = { paymentRequest, verifyRequest, getReceipt, getPayments, getUserPayment }
-// module.exports = { chargePayment, verifyPaymentCallback }
+        const allPayments = await Payment.find()
+            .sort({ createdAt: -1 })
+        // .skip(pageOptions.page * pageOptions.limit)
+        // .limit(pageOptions.limit);
+        if (allPayments.length < 1) {
+            throw new NotFound("No Payment found");
+        }
+        res
+            .status(200)
+            .json(allPayments);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+        console.log(error.message);
+    }
+};
+module.exports = { chargePayment, verifyPaymentCallback, webhookVerification, getPayments, getSinglePayment }
