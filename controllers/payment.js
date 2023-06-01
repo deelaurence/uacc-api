@@ -4,7 +4,7 @@ const { formatDate } = require('../utils/dateFormat')
 const paystack = require('paystack')(process.env.paystack_test_secret_key);
 const User = require('../models/UserModel')
 const Payment = require('../models/Payment')
-
+console.log(uuidv4())
 const chargePayment = async (req, res) => {
     try {
         // Create a new transaction

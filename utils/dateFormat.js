@@ -14,7 +14,7 @@ const formatDate = () => {
     const seconds = String(currentDate.getSeconds()).padStart(2, '0');
 
     const formattedTime = `${hours}:${minutes}:${seconds}`;
-    return formattedDate + ' ' + formattedTime
+    return formattedDate + ',' + formattedTime
 }
 
 module.exports = { formatDate }

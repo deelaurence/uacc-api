@@ -29,6 +29,10 @@ const paymentSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true
+    },
+    id: {
+        type: String,
+        required: true
     }
 });
 
