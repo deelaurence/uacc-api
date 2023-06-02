@@ -6,6 +6,9 @@ const generator = require('generate-serial-number')
 const serialNumber = generator.generate(1)
 const jwt = require('jsonwebtoken')
 const { sendMail } = require('../utils/mailer')
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
 const { sendBrevoMail } = require('../utils/brevomail')
 const {
   BadRequest,
@@ -13,6 +16,14 @@ const {
   Unauthenticated,
   InternalServerError
 } = require("../errors/customErrors");
+// const googleAuth = () => {
+
+// Google OAuth route
+// app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }));
+
+
+// }
+
 const register = async (req, res) => {
   try {
     shuffle(seedArray)

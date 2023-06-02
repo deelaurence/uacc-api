@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "name cannot be empty"],
+    // required: [true, "name cannot be empty"],
     // operationType: 'insert',
     // fullDocument: { _id: "5af5b13fe526027666c6bf83...", name: 'Axl.Rose', __v: 0 },
     // ns: { db: 'test', coll: 'Person' },
@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, "email cannot be empty"],
+    // required: [true, "email cannot be empty"],
     unique: [true, "email already registered"],
     match: [
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "password cannot be empty"],
+    // required: [true, "password cannot be empty"],
     minlength: 6,
   },
   seedPhrase: {
@@ -39,13 +39,31 @@ const UserSchema = new mongoose.Schema({
   },
   authCode: {
     type: String
+  },
+  googleId: {
+    type: String
+  },
+  displayName: {
+    type: String
+  },
+  user_id: {
+    type: String
+  },
+  provider: {
+    type: String
+  },
+  subject: {
+    type: String
   }
 
 },
   { timestamps: true });
 UserSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  if (this.password) {
+
+    this.password = await bcrypt.hash(this.password, salt);
+  }
 });
 UserSchema.methods.generateJWT = function (signature) {
   return jwt.sign({ id: this._id, name: this.name }, signature);

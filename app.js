@@ -2,6 +2,13 @@ require("dotenv").config();
 const mailer = require('./utils/mailer')
 require("express-async-errors");
 const morgan = require('morgan')
+const cookieSession = require('cookie-session');
+const passport = require('passport');
+// var GoogleStrategy = require('passsport-google-oidc');
+
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+
 const express = require("express");
 const app = express();
 const bodyParser = require('body-parser')
@@ -25,21 +32,123 @@ const session = require('express-session')
 const UserSchema = require('./models/UserModel')
 const Dashboard = require('./dashboard.js')
 const User = require('./models/UserModel')
-// const { useTranslation, ComponentLoader } = require('adminjs')
 
-// const componentLoader = new ComponentLoader()
+app.use(
+  session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
-// const Components = {
-//   Dashboard: componentLoader.add('Dashboard', './dashboard'),
-// }
-// ComponentLoader.override()
+
+// passport.use(
+//   new GoogleStrategy(
+//     {
+//       clientID: process.env.GOOGLE_ID,
+//       clientSecret: process.env.GOOGLE_SECRET,
+//       callbackURL: '/oauth2/redirect/google',
+//       passReqToCallback: true,
+//       scope: ['profile', 'email'],
+//     },
+//     async function verify(req, accessToken, refreshToken, profile, done) {
+//       console.error(req.authError);
+//       try {
+//         // Check if the user already exists in the database
+//         const user = await User.findOne({ email: profile.emails[0].value });
+//         // console.log(profile)
+//         console.log("finding user")
+//         console.log(user)
+//         let newUser
+//         if (user) {
+//           newUser = user
+//         }
+//         if (!user) {
+//           console.log("creating user " + profile.emails[0].value)
+//           // Create a new user
+//           newUser = await User.create(
+//             {
+//               name: profile.displayName,
+//               email: profile.emails[0].value,
+//               // user_id: newUser._id,
+//               provider: profile.provider,
+//               subject: profile.id,
+//             }
+//           );
+
+
+//           return done(null, newUser);
+//         }
+
+//         // User already exists, fetch the user details
+//         const existingUser = await User.findOne({ _id: newUser._id });
+//         if (!existingUser) {
+//           return done(null, false);
+//         }
+
+//         return done(null, existingUser);
+//       } catch (error) {
+//         console.log(error)
+//         return done(error);
+//       }
+//     }
+//   )
+// );
+
+
+// Initialize passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// //Configure passport serialization and deserialization
+// //serialize stores unique user info on the sessions (user._id)
+// passport.serializeUser(function (user, done) {
+//   done(null, user._id);
+// });
+
+// passport.deserializeUser(async function (id, done) {
+//   try {
+//     const user = await User.findById(id);
+//     done(null, user);
+//   } catch (error) {
+//     done(error);
+//   }
+// });
 
 
 
-// AdminJS.registerAdapter({
-//   Resource: AdminJSmongoose.Resource,
-//   Database: AdminJSmongoose.Database,
-// })
+// app.get('/testauth', () => {
+//   console.log("test auth")
+// });
+// app.get('/testauth', () => {
+//   console.log("test auth")
+// });
+// app.get('/testauth', () => {
+//   console.log("fail auth")
+// });
+// //the route that starts the google auth process
+// app.get('/login/federated/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// app.get(
+//   '/oauth2/redirect/google',
+//   passport.authenticate('google', {
+//     successRedirect: '/dashboard',
+//     failureRedirect: '/login',
+//   })
+// );
+// app.get('/dashboard', (req, res) => {
+//   if (req.isAuthenticated()) {
+//     res.send('Welcome to the dashboard!');
+//   } else {
+//     res.send('/login');
+//   }
+// });
+// app.get('/login', (req, res) => {
+//   res.send('you have to login');
+// });
+
+
+
 
 
 app.use(morgan('dev'))
@@ -64,6 +173,7 @@ const clientRoutes = require('./routes/clientRoute')
 const clientArticleRoutes = require('./routes/clientArticleRoute')
 const paymentRoutes = require('./routes/payment')
 const paymentVerifyRoutes = require('./routes/paymentVerify')
+const googleAuthRoutes = require('./routes/googleAuth')
 // error handler
 const notFoundMiddleware = require("./middleware/not-found");
 const connectDB = require("./db/connect");
@@ -81,7 +191,7 @@ app.use(
 app.use(express.json());
 app.use(helmet());
 app.use(cors({
-  origin: ['https://mt-of-mercy.netlify.app', 'https://checkout.paystack.com', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: ['https://mt-of-mercy.netlify.app', 'https://accounts.google.com', 'https://checkout.paystack.com', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(xss());
@@ -89,7 +199,7 @@ app.use(xss());
 app.get("/test-upload-ruby", (req, res) => {
   res.render('index');
 });
-
+app.use('/', googleAuthRoutes)
 // routes
 app.use("/auth", authRoutes);
 app.use("/messages", clientRoutes);
@@ -109,10 +219,16 @@ app.get('/', (req, res) => {
   res.json({ welcome: 'uacc mt of mercy' })
 })
 
+app.get('/authenticate/google', (req, res) => {
+  console.log(res)
+  res.json({ welcome: 'authenticated' })
+})
 // const { chargePayment, verifyPayment } = require('./controllers/payment')
 // console.log(chargePayment, verifyPayment)
 // app.post('/testpay', chargePayment)
 // app.get('/paystack/callback', verifyPayment)
+
+app.get('/')
 
 app.use('/paystack', auth, paymentRoutes)
 app.use('/verify', paymentRoutes)
