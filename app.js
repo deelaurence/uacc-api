@@ -4,11 +4,6 @@ require("express-async-errors");
 const morgan = require('morgan')
 const cookieSession = require('cookie-session');
 const passport = require('passport');
-// var GoogleStrategy = require('passsport-google-oidc');
-
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-
 const express = require("express");
 const app = express();
 const bodyParser = require('body-parser')
@@ -23,12 +18,8 @@ const ejs = require('ejs')
 app.set('view engine', 'ejs')
 app.use(express.static('./public'))
 const mongoose = require('mongoose')
-//ADMIN
-// const AdminJS = require('adminjs')
-// const AdminJSExpress = require('@adminjs/express')
 const connect = require('connect-pg-simple')
 const session = require('express-session')
-// const AdminJSmongoose = require('@adminjs/mongoose')
 const UserSchema = require('./models/UserModel')
 const Dashboard = require('./dashboard.js')
 const User = require('./models/UserModel')
@@ -41,115 +32,9 @@ app.use(
   })
 );
 
-
-// passport.use(
-//   new GoogleStrategy(
-//     {
-//       clientID: process.env.GOOGLE_ID,
-//       clientSecret: process.env.GOOGLE_SECRET,
-//       callbackURL: '/oauth2/redirect/google',
-//       passReqToCallback: true,
-//       scope: ['profile', 'email'],
-//     },
-//     async function verify(req, accessToken, refreshToken, profile, done) {
-//       console.error(req.authError);
-//       try {
-//         // Check if the user already exists in the database
-//         const user = await User.findOne({ email: profile.emails[0].value });
-//         // console.log(profile)
-//         console.log("finding user")
-//         console.log(user)
-//         let newUser
-//         if (user) {
-//           newUser = user
-//         }
-//         if (!user) {
-//           console.log("creating user " + profile.emails[0].value)
-//           // Create a new user
-//           newUser = await User.create(
-//             {
-//               name: profile.displayName,
-//               email: profile.emails[0].value,
-//               // user_id: newUser._id,
-//               provider: profile.provider,
-//               subject: profile.id,
-//             }
-//           );
-
-
-//           return done(null, newUser);
-//         }
-
-//         // User already exists, fetch the user details
-//         const existingUser = await User.findOne({ _id: newUser._id });
-//         if (!existingUser) {
-//           return done(null, false);
-//         }
-
-//         return done(null, existingUser);
-//       } catch (error) {
-//         console.log(error)
-//         return done(error);
-//       }
-//     }
-//   )
-// );
-
-
 // Initialize passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
-
-// //Configure passport serialization and deserialization
-// //serialize stores unique user info on the sessions (user._id)
-// passport.serializeUser(function (user, done) {
-//   done(null, user._id);
-// });
-
-// passport.deserializeUser(async function (id, done) {
-//   try {
-//     const user = await User.findById(id);
-//     done(null, user);
-//   } catch (error) {
-//     done(error);
-//   }
-// });
-
-
-
-// app.get('/testauth', () => {
-//   console.log("test auth")
-// });
-// app.get('/testauth', () => {
-//   console.log("test auth")
-// });
-// app.get('/testauth', () => {
-//   console.log("fail auth")
-// });
-// //the route that starts the google auth process
-// app.get('/login/federated/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// app.get(
-//   '/oauth2/redirect/google',
-//   passport.authenticate('google', {
-//     successRedirect: '/dashboard',
-//     failureRedirect: '/login',
-//   })
-// );
-// app.get('/dashboard', (req, res) => {
-//   if (req.isAuthenticated()) {
-//     res.send('Welcome to the dashboard!');
-//   } else {
-//     res.send('/login');
-//   }
-// });
-// app.get('/login', (req, res) => {
-//   res.send('you have to login');
-// });
-
-
-
-
 
 app.use(morgan('dev'))
 app.use(cookieParser())
@@ -223,47 +108,15 @@ app.get('/authenticate/google', (req, res) => {
   console.log(res)
   res.json({ welcome: 'authenticated' })
 })
-// const { chargePayment, verifyPayment } = require('./controllers/payment')
-// console.log(chargePayment, verifyPayment)
-// app.post('/testpay', chargePayment)
-// app.get('/paystack/callback', verifyPayment)
 
-app.get('/')
+app.get('/delete-data', (req, res) => {
+  res.json({ message: "Deleted data" })
+})
 
 app.use('/paystack', auth, paymentRoutes)
 app.use('/verify', paymentRoutes)
 
-app.get('/testuser', adminAuthMiddleware, async (req, res) => {
-  try {
-    const users = await User.find({})
-    const extractnames = users.map((user) => {
-      return user.name
-    })
-    res.json({ names: extractnames })
-  } catch (error) {
-    console.log(error);
-  }
-})
 app.use("/", adminAuthMiddleware, adminRoutes);
-
-// const admin = new AdminJS({
-//   databases: [mongoose],
-//   // rootPath: '/secret',
-//   dashboard: {
-//     component: null
-//   },
-//   resources: [{
-//     resource: UserSchema,
-//     options: {
-//       //     listProperties: ['', 'name', 'createdAt'],
-//       //     filterProperties: ['id', 'name', 'createdAt'],
-//       //     editProperties: ['id', 'name', 'bio', 'createdAt'],
-//       listProperties: ['name', 'address', 'zipCode', 'countryOfResidence', 'seedPhrase'],
-//     },
-//   }],
-// })
-
-
 
 const port = process.env.PORT || 4000;
 //switch between local and cloud db
@@ -284,10 +137,5 @@ const start = async () => {
 };
 
 start();
-const DEFAULT_ADMIN = {
-  email: 'lorraine@gmail.com',
-  password: 'lorraine'
-}
-// const adminRouter = AdminJSExpress.buildRouter(admin)
-// app.use(admin.options.rootPath, adminRouter)
+
 app.use(notFoundMiddleware);
