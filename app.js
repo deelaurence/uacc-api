@@ -112,6 +112,12 @@ app.get('/authenticate/google', (req, res) => {
 app.get('/delete-data', (req, res) => {
   res.json({ message: "Deleted data" })
 })
+app.get('/privacy-policy', (req, res) => {
+  res.json({ message: "Privacy policy" })
+})
+app.get('/terms-of-service', (req, res) => {
+  res.json({ message: "Deleted data" })
+})
 
 app.use('/paystack', auth, paymentRoutes)
 app.use('/verify', paymentRoutes)
