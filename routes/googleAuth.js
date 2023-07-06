@@ -109,6 +109,13 @@ route.get('/dashboard', async (req, res) => {
         console.log(req.user.email)
         const user = await User.findOne({ email: req.user.email })
         const token = user.generateJWT(process.env.JWT_SECRET);
+        console.log(token)
+        if (res.headersSent) {
+            console.log('Cookie was set successfully');
+        } else {
+            console.log('Failed to set cookie');
+        }
+
         res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
         res.redirect(`${process.env.CLIENT_URL}/#/give`)
     } else {
