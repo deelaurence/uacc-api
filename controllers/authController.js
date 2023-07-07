@@ -103,7 +103,7 @@ const login = async (req, res) => {
       throw new Unauthenticated("Verify your email")
     }
     const token = user.generateJWT(process.env.JWT_SECRET);
-
+    const userAgent = req.headers['user-agent'];
     if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
       // Set session storage for iOS devices
       req.session.token = token
