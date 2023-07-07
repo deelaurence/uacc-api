@@ -73,7 +73,6 @@ const addArticle = async (req, res) => {
             req.body.paragraphThree = req.body.paragraphThree.replace(/\n/g, '<br/>')
         }
         const newArticle = await Article.create(req.body)
-        console.log(newArticle);
         console.log(newArticle.paragraphOne.replace(/\n/g, '<Br>'))
         const getPopulated = await Article.findOne({ _id: newArticle._id }).populate({ path: "owner", model: "Admin" });
         // console.log(req.body.pictures)
@@ -92,9 +91,9 @@ const addArticle = async (req, res) => {
                 const stringed = webpConverted.toString('base64');
                 // console.log(buffer)
                 // Configuration 
-                console.log(webpConverted)
-                console.log(stringed.slice(0, 100))
-                console.log(base64Data.slice(0, 100))
+                // console.log(webpConverted)
+                // console.log(stringed.slice(0, 100))
+                // console.log(base64Data.slice(0, 100))
                 cloudinary.config({
                     cloud_name: process.env.cloud_name,
                     api_key: process.env.api_key,
@@ -228,7 +227,6 @@ const getArticles = async (req, res) => {
         res
             .status(StatusCodes.OK)
             .json(allArticles);
-        console.log(allArticles)
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
         console.log(error.message);
