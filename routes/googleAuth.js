@@ -117,8 +117,8 @@ route.get('/dashboard', async (req, res) => {
             console.log('Failed to set cookie');
         }
 
-        // res.redirect(`${process.env.CLIENT_URL}/#/give`)
-        res.json({ token })
+        res.redirect(`${process.env.CLIENT_URL}/#/give`)
+        // res.json({ token })
     } else {
         res.json({ message: 'user unauthenticated' });
     }
