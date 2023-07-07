@@ -110,6 +110,7 @@ const login = async (req, res) => {
       console.log("Setting session for iphone")
     }
     else {
+      req.session.token = token
       console.log("setting cookies for android, windows")
       res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
     }
