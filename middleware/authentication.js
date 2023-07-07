@@ -16,7 +16,11 @@ const auth = async (req, res, next) => {
       console.log("User agent not ios")
     }
 
-    const iosToken = authorization.split(' ')[1];
+    let iosToken;
+    if (authorization) {
+
+      iosToken = authorization.split(' ')[1];
+    }
     // return console.log(req.cookies)
     if (!token && !iosToken) {
       throw new Unauthenticated("supply token");
