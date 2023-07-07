@@ -103,7 +103,16 @@ const login = async (req, res) => {
       throw new Unauthenticated("Verify your email")
     }
     const token = user.generateJWT(process.env.JWT_SECRET);
-    res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
+
+    if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+      // Set session storage for iOS devices
+      req.session.token = token
+      console.log("Setting session for iphone")
+    }
+    else {
+      console.log("setting cookies for android, windows")
+      res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
+    }
     res.status(StatusCodes.OK).json({ ...user._doc, token: token });
   } catch (error) {
     const { message, statusCode } = error;
