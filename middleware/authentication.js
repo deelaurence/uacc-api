@@ -29,7 +29,7 @@ const auth = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.log('auth error')
+    console.log('auth error:' + error)
     const { Message, statusCode } = error;
     console.log(statusCode, Message);
     if (statusCode) {
