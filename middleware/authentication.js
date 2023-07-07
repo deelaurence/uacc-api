@@ -21,6 +21,8 @@ const auth = async (req, res, next) => {
     if (!token && !iosToken) {
       throw new Unauthenticated("supply token");
     }
+    console.log("token: " + token)
+    console.log("iosToken: " + iosToken)
     const payload = jwt.verify(token || iosToken, process.env.JWT_SECRET);
     req.decoded = { name: payload.name, id: payload.id };
     console.log('auth end, next')
