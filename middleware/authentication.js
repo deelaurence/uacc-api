@@ -9,7 +9,7 @@ const auth = async (req, res, next) => {
     // const { authorization } = req.headers;
     const { token } = req.cookies;
     const { authorization } = req.headers;
-
+    console.log(authorization)
     if (!authorization || !authorization.startsWith('Bearer ')) {
       // res.status(401).json({ message: 'Unauthorized' });
       // return;

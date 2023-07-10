@@ -108,13 +108,14 @@ const login = async (req, res) => {
       // Set session storage for iOS devices
       req.session.token = token
       console.log("Setting session for iphone")
+      return res.status(StatusCodes.OK).json({ ...user._doc, token: token });
     }
     else {
       req.session.token = token
       console.log("setting cookies for android, windows")
       res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
+      return res.status(StatusCodes.OK).json({ ...user._doc });
     }
-    res.status(StatusCodes.OK).json({ ...user._doc, token: token });
   } catch (error) {
     const { message, statusCode } = error;
     console.log(statusCode, message);
