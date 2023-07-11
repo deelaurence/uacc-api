@@ -33,6 +33,14 @@ const register = async (req, res) => {
     req.body.id = serialNumber
     // console.log(process.env.SERVER_URL)
     const newUser = await User.create(req.body);
+    const existingUser = await User.findOne({ email: req.body.email })
+    if (existingUser) {
+      if (existingUser.provider == "google") {
+        res.status(StatusCodes.CONFLICT)
+          .json({ message: "You registered with a Google account" });
+        return;
+      }
+    }
     const token = newUser.generateJWT(process.env.JWT_SECRET);
 
     const link = `${process.env.SERVER_URL}/auth/verify-mail/${token}`
@@ -47,11 +55,7 @@ const register = async (req, res) => {
       .json({ owner: newUser.name, email: newUser.email, });
   } catch (error) {
     if (error.code === 11000) {
-      if (newUser.provider == "google") {
-        res.status(StatusCodes.CONFLICT)
-          .json({ message: "You registered with a Google account" });
-        return;
-      }
+
       res
         .status(StatusCodes.CONFLICT)
         .json({ message: "Email already registered, Sign In" });
