@@ -112,7 +112,7 @@ route.get('/dashboard', async (req, res) => {
         console.log(token)
         res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
         // req.session.token = token;
-
+        const userAgent = req.headers['user-agent'];
         if (res.headersSent) {
             console.log('Cookie was set successfully');
         } else {
@@ -120,6 +120,7 @@ route.get('/dashboard', async (req, res) => {
         }
         if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
             // ?token = ' + encodeURIComponent(token)
+
             return res.redirect(`${process.env.CLIENT_URL}/#/give?token=${encodeURIComponent(token)}`)
         }
         res.redirect(`${process.env.CLIENT_URL}/#/give`)
