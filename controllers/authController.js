@@ -47,6 +47,11 @@ const register = async (req, res) => {
       .json({ owner: newUser.name, email: newUser.email, });
   } catch (error) {
     if (error.code === 11000) {
+      if (newUser.provider == "google") {
+        res.status(StatusCodes.CONFLICT)
+          .json({ message: "You registered with a Google account" });
+        return;
+      }
       res
         .status(StatusCodes.CONFLICT)
         .json({ message: "Email already registered, Sign In" });
@@ -92,6 +97,11 @@ const login = async (req, res) => {
       throw new BadRequest("email and password cannot be empty");
     }
     const user = await User.findOne({ email: email });
+    if (user.provider == "google") {
+      res.status(StatusCodes.CONFLICT)
+        .json({ message: "You registered with a Google account" });
+      return;
+    }
     if (!user) {
       throw new NotFound("Email not registered, Sign up");
     }
