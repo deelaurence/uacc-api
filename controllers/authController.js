@@ -32,7 +32,6 @@ const register = async (req, res) => {
     req.body.seedPhrase = seedPhrase
     req.body.id = serialNumber
     // console.log(process.env.SERVER_URL)
-    const newUser = await User.create(req.body);
     const existingUser = await User.findOne({ email: req.body.email })
     if (existingUser) {
       if (existingUser.provider == "google") {
@@ -41,6 +40,7 @@ const register = async (req, res) => {
         return;
       }
     }
+    const newUser = await User.create(req.body);
     const token = newUser.generateJWT(process.env.JWT_SECRET);
 
     const link = `${process.env.SERVER_URL}/auth/verify-mail/${token}`
