@@ -87,14 +87,14 @@ route.get('/testauth', () => {
 route.get('/testauth', () => {
     console.log("fail auth")
 });
+
+
 //the route that starts the google auth process
 route.get('/login/federated/google', (req, res) => {
     const emptyResponse = new ServerResponse(req)
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, emptyResponse)
     console.log(emptyResponse.getHeader('location'))
     res.json({ message: emptyResponse.getHeader('location') })
-
-
 })
 
 route.get(
@@ -104,6 +104,7 @@ route.get(
         failureRedirect: '/login',
     })
 );
+
 route.get('/dashboard', async (req, res) => {
     if (req.isAuthenticated()) {
         console.log(req.user.email)

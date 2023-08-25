@@ -8,8 +8,8 @@ const jwt = require('jsonwebtoken')
 const { sendMail } = require('../utils/mailer')
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-const { sendBrevoMail } = require('../utils/brevomail')
+const bcrypt = require('bcryptjs')
+const { sendBrevoMail, sendPasswordResetMail } = require('../utils/brevomail')
 const {
   BadRequest,
   NotFound,
@@ -34,7 +34,7 @@ const register = async (req, res) => {
     // console.log(process.env.SERVER_URL)
     const existingUser = await User.findOne({ email: req.body.email })
     if (existingUser) {
-      if (existingUser.provider == "google") {
+      if (existingUser && existingUser.provider) {
         res.status(StatusCodes.CONFLICT)
           .json({ message: "You registered with a Google account" });
         return;
@@ -67,6 +67,8 @@ const register = async (req, res) => {
 };
 console.log(process.env.CLIENT_URL)
 const clientUrl = `${process.env.CLIENT_URL}/#/verified`
+const clientUrl2 = `${process.env.CLIENT_URL}/#/reset-password`
+
 const verifyEmail = async (req, res) => {
   try {
     const token = req.params.signature
@@ -79,6 +81,70 @@ const verifyEmail = async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json({ error: error.message })
   }
 }
+
+const verifyEmailPasswordReset = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      throw new NotFound("User not found, Check email again or Register")
+    }
+    if (user) {
+      if (user && user.provider) {
+        res.status(StatusCodes.CONFLICT)
+          .json({ message: "This account was registered with Google Sign-In" });
+        return;
+      }
+    }
+    const token = user.generateJWT(process.env.JWT_SECRET);
+    const link = `${process.env.SERVER_URL}/auth/verify-mail-password-reset/${token}`
+    const mailStatus = await sendPasswordResetMail(req.body.email, user.name, link)
+    console.log(mailStatus)
+    if (mailStatus != 201) {
+      throw new InternalServerError("Something went wrong while trying to send verification email, try again later")
+    }
+    return res.json({ message: `An Email has been sent to ${req.body.email} follow the instructions accordingly` })
+  } catch (error) {
+    console.log(error)
+    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message })
+  }
+}
+
+const verifiedEmailPasswordReset = async (req, res) => {
+  try {
+    const token = req.params.signature
+    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findOneAndUpdate({ _id: payload.id }, { canResetPassword: true })
+    res.status(StatusCodes.PERMANENT_REDIRECT)
+      .redirect(`${clientUrl2}/?email=${encodeURIComponent(user.email)}`)
+  } catch (error) {
+    console.error(error)
+    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message })
+  }
+}
+
+const updatePassword = async (req, res) => {
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt)
+    const user = await User.findOne({ email: req.body.email })
+    if (!user.canResetPassword) {
+      throw new BadRequest("You need to verify email before resetting password!")
+    }
+    const edited = await User.findOneAndUpdate(
+      {
+        email: req.body.email,
+      },
+      { password: hashedPassword, canResetPassword: false },
+      { new: true, runValidators: true }
+    );
+    res.json({ message: "Password Reset Successful" })
+  } catch (error) {
+    console.error(error)
+    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message })
+  }
+}
+
+
 const deleteUser = async (req, res) => {
   try {
     const email = req.params.email
@@ -101,7 +167,7 @@ const login = async (req, res) => {
       throw new BadRequest("email and password cannot be empty");
     }
     const user = await User.findOne({ email: email });
-    if (user.provider == "google") {
+    if (user && user.provider) {
       res.status(StatusCodes.CONFLICT)
         .json({ message: "You registered with a Google account" });
       return;
@@ -142,10 +208,13 @@ const login = async (req, res) => {
     console.log(message);
   }
 };
+
+
+
 const logout = (req, res) => {
   res.clearCookie('token', { httpOnly: true, sameSite: 'none', secure: true });
   res.json({ message: "logged out" });
 }
 
 
-module.exports = { register, login, logout, verifyEmail, deleteUser };
+module.exports = { register, login, logout, verifyEmail, deleteUser, verifyEmailPasswordReset, verifiedEmailPasswordReset, updatePassword };

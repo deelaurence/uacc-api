@@ -43,6 +43,10 @@ const UserSchema = new mongoose.Schema({
   googleId: {
     type: String
   },
+  canResetPassword: {
+    type: Boolean,
+    default: false
+  },
   displayName: {
     type: String
   },
