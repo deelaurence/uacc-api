@@ -26,18 +26,18 @@ const {
 
 const register = async (req, res) => {
   try {
-    shuffle(seedArray)
-    let slicedArray = seedArray.slice(0, 6)
-    let seedPhrase = slicedArray.join("-")
-    req.body.seedPhrase = seedPhrase
     req.body.id = serialNumber
     // console.log(process.env.SERVER_URL)
     const existingUser = await User.findOne({ email: req.body.email })
     if (existingUser) {
-      if (existingUser && existingUser.provider) {
+      if (existingUser.provider) {
         res.status(StatusCodes.CONFLICT)
           .json({ message: "You registered with a Google account" });
         return;
+      }
+      
+      if (!existingUser.verified) {
+        await User.findOneAndDelete({ email: req.body.email })
       }
     }
     const newUser = await User.create(req.body);
@@ -177,25 +177,18 @@ const login = async (req, res) => {
     }
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      throw new Unauthenticated("Invalid credentials");
+      throw new Unauthenticated("Your password is incorrect");
     }
     if (!user.verified) {
       throw new Unauthenticated("Verify your email")
     }
     const token = user.generateJWT(process.env.JWT_SECRET);
-    const userAgent = req.headers['user-agent'];
-    if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+    
       // Set session storage for iOS devices
-      req.session.token = token
       console.log("Setting session for iphone")
       return res.status(StatusCodes.OK).json({ ...user._doc, token: token });
-    }
-    else {
-      req.session.token = token
-      console.log("setting cookies for android, windows")
-      res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
-      return res.status(StatusCodes.OK).json({ ...user._doc });
-    }
+    
+   
   } catch (error) {
     const { message, statusCode } = error;
     console.log(statusCode, message);

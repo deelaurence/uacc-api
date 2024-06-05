@@ -1,6 +1,8 @@
 const cloudinary = require('cloudinary').v2;
 const { processImage } = require('../utils/optimize-image')
 const fs = require('fs')
+const {readMinutes} = require('../utils/readMinutes')
+const {getCurrentDateString} = require('../utils/date')
 require("dotenv").config();
 const Message = require("../models/messageM");
 const Withdrawal = require("../models/WithdrawalM");
@@ -24,31 +26,11 @@ const addMessage = async (req, res) => {
     let year = new Date().getFullYear()
     const date = `${day}-${month + 1}-${year}`
     req.body.owner = req.decoded.id;
-    req.body.paragraphOne
-    req.body.paragraphTwo
-    req.body.paragraphThree
-    function countWords(str) {
-      return str.trim().split(/\s+/).length;
-    }
-    let wordsCount = countWords(req.body.paragraphOne)
-    if (req.body.paragraphTwo) {
-      wordsCount = wordsCount + countWords(req.body.paragraphTwo)
-    }
-    if (req.body.paragraphThree) {
-      wordsCount = wordsCount + countWords(req.body.paragraphThree)
-    }
-
-
-    if (Math.round(wordsCount / 60) == 0 || Math.round(wordsCount / 60) == 1) {
-      req.body.readMinutes = `One minute read`
-    }
-    else if (Math.round(wordsCount / 60) == 2) {
-      req.body.readMinutes = `Two minutes read`
-    }
-    else {
-      req.body.readMinutes = `${Math.round(wordsCount / 60)} minutes read`
-    }
-
+    let _readMinutes = readMinutes(
+      req.body.paragraphOne,req.body.paragraphTwo,req.body.paragraphThree
+    )
+    req.body.readMinutes=_readMinutes
+    req.body.day=getCurrentDateString()
     req.body.date = date;
     req.body.id = uuidv4();
     req.body.reference = "#" + req.decoded.name.slice(0, 3) + "/" + uuidv4()
@@ -72,6 +54,13 @@ const addMessage = async (req, res) => {
     console.log(newMessage.paragraphOne.replace(/\n/g, '<Br>'))
     const getPopulated = await Message.findOne({ _id: newMessage._id }).populate({ path: "owner", model: "Admin" });
     // console.log(req.body.pictures)
+    const {unsplashPictures} = req.body
+        if(unsplashPictures[0]){
+            unsplashPictures.forEach(async(picture)=>{
+                await Message.findOneAndUpdate({ _id:newMessage._id }, { "$push": { "image": picture } });
+            })
+        }
+    
     req.body.pictures.forEach(async (picture, index) => {
       try {
         console.log(2)
@@ -100,13 +89,12 @@ const addMessage = async (req, res) => {
         console.log(4)
         cloudinary_response.then(async ({ secure_url }) => {
           console.log(secure_url);
-          const includeUrl = await Message.findOneAndUpdate({ paragraphOne: req.body.paragraphOne }, { "$push": { "image": secure_url } });
+          const includeUrl = await Message.findOneAndUpdate({ _id:newMessage._id }, { "$push": { "image": secure_url } });
           console.log("index is--" + index)
           // if (index == 1) {
           //   const includeUrlTwo = await Message.findOneAndUpdate({ paragraphOne: req.body.paragraphOne }, { imageTwo: secure_url });
           //   console.log("updated imageTwo field to " + includeUrlTwo.imageTwo)
           // }
-          res.status(StatusCodes.CREATED).json(getPopulated);
           console.log("updated image field to " + includeUrl.image)
 
           console.log(5)
@@ -136,7 +124,6 @@ const addMessage = async (req, res) => {
       }
     })
     console.log(6)
-    console.log(fake)
 
   } catch (error) {
     console.log(error);

@@ -40,15 +40,13 @@ app.use(morgan('dev'))
 app.use(cookieParser())
 // app.use(express.bodyParser({ limit: '50mb' }))
 //auth middlewares
-const auth = require("./middleware/authentication");
-const adminAuthMiddleware = require("./middleware/admin-auth");
+// const auth = require("./middleware/authentication");
+// const adminAuthMiddleware = require("./middleware/admin-auth");
 
 //routes
 const MessageRoutes = require('./routes/messageR')
 const ArticleRoutes = require('./routes/articleR')
 const AdminPaymentRoutes = require('./routes/adminPayment')
-const notificationRoutes = require('./routes/notificationRoute')
-const withdrawalRoutes = require('./routes/withdrawalR')
 const authRoutes = require("./routes/authRoute");
 const adminAuth = require("./routes/adminAuth");
 const uploadRoutes = require("./routes/uploadIdR")
@@ -76,7 +74,13 @@ app.use(
 app.use(express.json());
 app.use(helmet());
 app.use(cors({
-  origin: ['https://mt-of-mercy.netlify.app', 'https://accounts.google.com', 'https://checkout.paystack.com', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: [
+    'https://mt-of-mercy.netlify.app', 
+    'https://accounts.google.com', 
+    'https://checkout.paystack.com', 
+    'http://localhost:5173', 
+    'http://localhost:5174',  
+    'http://localhost:3000'],
   credentials: true
 }));
 app.use(xss());
@@ -92,12 +96,12 @@ app.use("/messages", clientRoutes);
 app.use("/articles", clientArticleRoutes);
 // app.use("/messages", clientRoutes);
 // app.use("/notification", adminAuth, notificationRoutes);
-app.use("/message", adminAuthMiddleware, MessageRoutes);
-app.use("/article", adminAuthMiddleware, ArticleRoutes);
-app.use("/payment", adminAuthMiddleware, AdminPaymentRoutes);
+app.use("/message",  MessageRoutes);
+app.use("/article",  ArticleRoutes);
+app.use("/payment",  AdminPaymentRoutes);
 // app.use("/withdrawal", auth, withdrawalRoutes);
 // app.use("/upload", uploadRoutes);
-app.use("/auth", auth, modifyUserRoutes);
+app.use("/auth", modifyUserRoutes);
 // app.use('/docs', swaggerUI.serve, swaggerUI.setup(docs));
 app.use("/admin/auth", adminAuth);
 app.get('/', (req, res) => {
@@ -119,10 +123,21 @@ app.get('/terms-of-service', (req, res) => {
   res.json({ message: "Deleted data" })
 })
 
-app.use('/paystack', auth, paymentRoutes)
+app.use('/paystack', paymentRoutes)
 app.use('/verify', paymentRoutes)
 
-app.use("/", adminAuthMiddleware, adminRoutes);
+app.use("/", adminRoutes);
+app.use(notFoundMiddleware);
+
+// 404 Not Found Middleware
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Route not found'
+  });
+});
+
+
 
 const port = process.env.PORT || 4000;
 //switch between local and cloud db
@@ -143,5 +158,3 @@ const start = async () => {
 };
 
 start();
-
-app.use(notFoundMiddleware);

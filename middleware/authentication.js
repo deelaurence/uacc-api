@@ -9,24 +9,14 @@ const auth = async (req, res, next) => {
     // const { authorization } = req.headers;
     const { token } = req.cookies;
     const { authorization } = req.headers;
-    console.log(authorization)
-    if (!authorization || !authorization.startsWith('Bearer ')) {
-      // res.status(401).json({ message: 'Unauthorized' });
-      // return;
-      console.log("User agent not ios")
-    }
-
     let iosToken;
     if (authorization) {
-
       iosToken = authorization.split(' ')[1];
     }
     // return console.log(req.cookies)
     if (!token && !iosToken) {
       throw new Unauthenticated("supply token");
     }
-    console.log("token: " + token)
-    console.log("iosToken: " + iosToken)
     const payload = jwt.verify(token || iosToken, process.env.JWT_SECRET);
     req.decoded = { name: payload.name, id: payload.id };
     console.log('auth end, next')

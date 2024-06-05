@@ -110,7 +110,8 @@ route.get('/dashboard', async (req, res) => {
         console.log(req.user.email)
         const user = await User.findOne({ email: req.user.email })
         const token = user.generateJWT(process.env.JWT_SECRET);
-        console.log(token)
+        const name = user.name
+        const email = user.email
         res.cookie('token', token, { httpOnly: true, sameSite: "none", secure: true });
         // req.session.token = token;
         const userAgent = req.headers['user-agent'];
@@ -119,13 +120,9 @@ route.get('/dashboard', async (req, res) => {
         } else {
             console.log('Failed to set cookie');
         }
-        if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-            // ?token = ' + encodeURIComponent(token)
-
-            return res.redirect(`${process.env.CLIENT_URL}/#/give?token=${encodeURIComponent(token)}`)
-        }
-        res.redirect(`${process.env.CLIENT_URL}/#/give`)
-        // res.json({ token })
+        
+        return res.redirect(`${process.env.CLIENT_URL}/#/give?token=${encodeURIComponent(token)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`)
+        res.json({ token })
     } else {
         res.json({ message: 'user unauthenticated' });
     }

@@ -21,11 +21,11 @@ const ArticleSchema = new mongoose.Schema(
         },
         writer: {
             type: String,
-            required: [true, "please provide minister"],
+            required: [true, "please provide writer"],
         },
         headingOne: {
             type: String,
-            required: [true, "please provide details"],
+            required: [true, "please provide heading one"],
         },
         paragraphOne: {
             type: String,

@@ -12,24 +12,27 @@ const auth = async (req, res, next) => {
     }
 
     let { authorization } = req.headers;
-    if (!authorization) {
+    if (!authorization ) {
       throw new Unauthenticated("supply token and Bearer");
     }
     console.log('admin auth start')
     res.set('Access-Control-Expose-Headers', 'Content-Range')
     res.set('X-Total-Count', 10)
     res.set('Content-Range', 10)
+    
     authorization = authorization.replace(/(^"|"$)/g, '')
+    
     let token = authorization.split(" ")[1];
     if (!token) {
       token = authorization
     }
+
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.decoded = { name: payload.name, id: payload.id };
-    console.log('auth end, next')
+    console.log('admin auth end, next')
     next();
   } catch (error) {
-    console.log('auth error')
+    console.log('ADMIN auth error')
     const { message, statusCode } = error;
     console.log(statusCode, message);
     if (statusCode) {

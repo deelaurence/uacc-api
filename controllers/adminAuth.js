@@ -51,7 +51,7 @@ const login = async (req, res) => {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
-    res.cookie('token', 'dax', {
+    res.cookie('admin_token', token, {
       // maxAge: 5000,
       secure: true,
       httpOnly: false,
@@ -60,7 +60,7 @@ const login = async (req, res) => {
 
 
     // console.log(res.cookie().token)
-    res.status(StatusCodes.OK).json(token);
+    res.status(StatusCodes.OK).json({token,name:user.name});
   } catch (error) {
     const { message, statusCode } = error;
     console.log(statusCode, message);
