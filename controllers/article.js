@@ -120,7 +120,7 @@ const addArticle = async (req, res) => {
             }
         })
         console.log(6)
-    
+    res.json({message:"article posted"})
 
     } catch (error) {
         console.log(error);
