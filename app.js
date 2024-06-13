@@ -98,10 +98,11 @@ app.use("/articles", clientArticleRoutes);
 // app.use("/notification", adminAuth, notificationRoutes);
 app.use("/message",  MessageRoutes);
 app.use("/article",  ArticleRoutes);
-app.use("/payment",  AdminPaymentRoutes);
+app.use("/admin/payments",  AdminPaymentRoutes);
 // app.use("/withdrawal", auth, withdrawalRoutes);
 // app.use("/upload", uploadRoutes);
 app.use("/auth", modifyUserRoutes);
+
 // app.use('/docs', swaggerUI.serve, swaggerUI.setup(docs));
 app.use("/admin/auth", adminAuth);
 app.get('/', (req, res) => {
@@ -126,7 +127,9 @@ app.get('/terms-of-service', (req, res) => {
 app.use('/paystack', paymentRoutes)
 app.use('/verify', paymentRoutes)
 
-app.use("/", adminRoutes);
+app.use("/admin", adminRoutes);
+
+
 app.use(notFoundMiddleware);
 
 // 404 Not Found Middleware

@@ -1,15 +1,56 @@
 const User = require("../models/UserModel");
+const PaymentTag = require('../models/PaymentTags')
 const { StatusCodes } = require("http-status-codes");
 const {
   BadRequest,
   NotFound,
   Unauthenticated,
 } = require("../errors/customErrors");
+
+
+const addPaymentTags = async(req,res)=>{
+  try{
+    const paymentTag = await PaymentTag.create(req.body)
+    await paymentTag.save()
+    return res.json({message:"Tag added"})
+  }
+  catch(error){
+    console.log(error)
+    res.status(StatusCodes.BAD_REQUEST).json({message:error.message})
+  }
+}
+
+
+// Get all payment tags
+const getAllPaymentTags = async (req, res) => {
+  try {
+    const paymentTags = await PaymentTag.find({}).sort({ _id: -1 });
+    res.status(StatusCodes.OK).json(paymentTags);
+  } catch (error) {
+    console.error(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+// Delete a single payment tag by ID
+const deletePaymentTag = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const paymentTag = await PaymentTag.findByIdAndDelete(id);
+    if (!paymentTag) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Payment tag not found" });
+    }
+    res.status(StatusCodes.OK).json({ message: "Tag deleted", paymentTag });
+  } catch (error) {
+    console.error(error);
+    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+  }
+};
+
+
+
 const getUsers = async (req, res) => {
   try {
-    // res.set('Access-Control-Expose-Headers','Content-Range')
-    // res.set('X-Total-Count',10)
-    // res.set('Content-Range',10)
     const allUser = await User.find({}).sort({ createdAt: -1 });
     if (allUser.length < 1) {
       throw new NotFound("No user");
@@ -123,4 +164,4 @@ const adminDeleteSingleMessage = async (req, res) => {
 
 
 
-module.exports = { getUsers, adminGetSingleUser, adminEditSingleUser }
+module.exports = { getUsers, adminGetSingleUser, adminEditSingleUser, addPaymentTags, deletePaymentTag, getAllPaymentTags }

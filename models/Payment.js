@@ -12,8 +12,7 @@ const paymentSchema = new mongoose.Schema({
     description: {
         type: String,
         required: true
-    }
-    ,
+    },
     reference: {
         type: String,
         required: true

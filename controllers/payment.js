@@ -4,6 +4,7 @@ const { formatDate } = require('../utils/dateFormat')
 const paystack = require('paystack')(process.env.paystack_key);
 const User = require('../models/UserModel')
 const Payment = require('../models/Payment')
+const PaymentTag = require('../models/PaymentTags')
 const clientUrl = process.env.CLIENT_URL+"/#"
 const {
   NotFound,
@@ -12,14 +13,13 @@ const {
 } = require("../errors/customErrors");
 let payingUserCache;
 const chargePayment = async (req, res) => {
+  
   try {
-
-
     // Create a new transaction
     console.log(req.decoded.name);
     const userId = req.decoded.id;
     const user = await User.findOne({ _id: userId });
-
+    
     if (!user) {
       throw new NotFound("User not found");
     }
@@ -200,12 +200,13 @@ const getPayments = async (req, res) => {
       query = { owner: req.decoded.id };
     }
 
-    const allPayments = await Payment.find().sort({ createdAt: -1 });
+    const allPayments = await Payment.find().sort({ _id: -1 });
     // .skip(pageOptions.page * pageOptions.limit)
     // .limit(pageOptions.limit);
     if (allPayments.length < 1) {
       throw new NotFound("No Payment found");
     }
+    
     res.status(200).json(allPayments);
   } catch (error) {
     res.status(400).json({ message: error.message });
