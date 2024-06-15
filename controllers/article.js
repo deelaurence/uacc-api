@@ -131,16 +131,42 @@ const addArticle = async (req, res) => {
 
 const editSingleArticle = async (req, res) => {
     try {
-
+        console.log(req.body)
         if (!req.params.id) {
             throw new BadRequest("req.params cannot be empty")
         }
         const articleId = req.params.id
-        const { writer, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree } = req.body
+        const { 
+            writer,
+            title, 
+            paragraphOne, 
+            paragraphTwo, 
+            paragraphThree, 
+            headingOne, 
+            headingTwo, 
+            headingThree, 
+            pointOne, 
+            pointTwo, 
+            pointThree, 
+            pointFour, 
+            pointFive, 
+            pointSix, 
+            pointSeven, 
+            pointEight, 
+            pointNine, 
+            pointTen, 
+            quoteOne, 
+            quoteTwo,
+            image, 
+            pictures,
+            unsplashPictures,
+            quoteThree } = req.body
+            
         const singleArticle = await Article.findOneAndUpdate({
-            id: articleId
-        }, { writer, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
+            _id: articleId
+        }, { writer, image:unsplashPictures||pictures, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
         res.status(StatusCodes.OK).json(singleArticle)
+        
     } catch (error) {
         console.log(error)
         res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
