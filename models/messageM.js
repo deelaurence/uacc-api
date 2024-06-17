@@ -113,7 +113,11 @@ const MessageSchema = new mongoose.Schema(
     filterName: {
       type: String,
       required: true,
-    }
+    },
+    publish: {
+      type: Boolean,
+      default: false,
+  }
 
   },
   { timestamps: true },

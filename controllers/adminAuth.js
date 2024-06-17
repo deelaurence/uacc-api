@@ -60,7 +60,7 @@ const login = async (req, res) => {
 
 
     // console.log(res.cookie().token)
-    res.status(StatusCodes.OK).json({token,name:user.name});
+    res.status(StatusCodes.OK).json({token,name:user.name,superAdmin:user.superAdmin});
   } catch (error) {
     const { message, statusCode } = error;
     console.log(statusCode, message);

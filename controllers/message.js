@@ -130,6 +130,8 @@ const addMessage = async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 };
+
+
 const editSingleMessage = async (req, res) => {
   try {
 
@@ -137,10 +139,10 @@ const editSingleMessage = async (req, res) => {
       throw new BadRequest("req.params cannot be empty")
     }
     const MessageId = req.params.id
-    const { minister, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree } = req.body
+    const { minister,pictures,unsplashPictures,title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree } = req.body
     const singleMessage = await Message.findOneAndUpdate({
-      id: MessageId
-    }, { minister, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
+      _id: MessageId
+    }, {  image:unsplashPictures||pictures,minister, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
     res.status(StatusCodes.OK).json(singleMessage)
   } catch (error) {
     console.log(error)

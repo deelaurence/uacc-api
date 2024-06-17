@@ -19,6 +19,10 @@ const AdminSchema = new Schema({
     type: Number,
     required: [true, "ID cannot be empty"]
   },
+  superAdmin: {
+    type: Boolean,
+    default: false
+  },
   password: {
     type: String,
     required: [true, 'Please enter a password'],
