@@ -117,6 +117,9 @@ const MessageSchema = new mongoose.Schema(
     publish: {
       type: Boolean,
       default: false,
+  },
+  aboutAuthor: {
+      type: String,
   }
 
   },

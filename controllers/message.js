@@ -8,6 +8,7 @@ const Message = require("../models/messageM");
 const Withdrawal = require("../models/WithdrawalM");
 const Admin = require("../models/AdminAuth")
 const User = require("../models/UserModel")
+const Author = require("../models/Authors")
 const { v4: uuidv4 } = require('uuid');
 const { StatusCodes } = require("http-status-codes");
 const { BadRequest, NotFound } = require("../errors/customErrors");
@@ -16,10 +17,6 @@ let uniqueId = 0
 const addMessage = async (req, res) => {
   console.log(1)
   try {
-    // console.log(req.body.pictures.rawFile.path)
-
-    // https://res.cloudinary.com/<cloud_name>/image/upload/h_150,w_100/olympic_flag
-
     uniqueId++
     let day = new Date().getDate()
     let month = new Date().getMonth()
@@ -38,8 +35,9 @@ const addMessage = async (req, res) => {
     if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).json({ Message: "admin not found" })
     }
-    console.log(1.1)
-    console.log(req.body.day)
+    const author = await Author.findOne({name:req.body.minister})
+    console.log(author.description)
+    req.body.aboutAuthor=author.description
     req.body.filterId = admin.id
     req.body.filterName = admin.name
     req.body.author = admin.name
@@ -140,9 +138,10 @@ const editSingleMessage = async (req, res) => {
     }
     const MessageId = req.params.id
     const { minister,pictures,unsplashPictures,title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree } = req.body
+    
     const singleMessage = await Message.findOneAndUpdate({
       _id: MessageId
-    }, {  image:unsplashPictures||pictures,minister, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
+    }, { publish:false, image:unsplashPictures||pictures,minister, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
     res.status(StatusCodes.OK).json(singleMessage)
   } catch (error) {
     console.log(error)

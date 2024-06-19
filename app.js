@@ -12,6 +12,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const xss = require("xss-clean");
 const rateLimiter = require("express-rate-limit");
+const authorRoutes = require('./routes/author.js')
 // const swaggerUI = require('swagger-ui-express');
 const docs = require('./docs');
 const ejs = require('ejs')
@@ -91,6 +92,7 @@ app.get("/test-upload-ruby", (req, res) => {
 app.use('/', googleAuthRoutes)
 // routes
 app.use("/auth", authRoutes);
+app.use("/author", authorRoutes);
 app.use("/messages", clientRoutes);
 
 app.use("/articles", clientArticleRoutes);

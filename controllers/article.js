@@ -12,6 +12,7 @@ const { StatusCodes } = require("http-status-codes");
 const { BadRequest, NotFound } = require("../errors/customErrors");
 const articleM = require('../models/ArticleM');
 let uniqueId = 0
+const Author = require('../models/Authors')
 const {getCurrentDateString}=require('../utils/date')
 
 
@@ -49,6 +50,9 @@ const addArticle = async (req, res) => {
         let _readMinutes = readMinutes(
             req.body.paragraphOne,req.body.paragraphTwo,req.body.paragraphThree
         )
+        const author = await Author.findOne({name:req.body.writer})
+        
+        req.body.aboutAuthor=author.description
         
         req.body.readMinutes=_readMinutes
         const newArticle = await Article.create(req.body)
@@ -164,7 +168,7 @@ const editSingleArticle = async (req, res) => {
             
         const singleArticle = await Article.findOneAndUpdate({
             _id: articleId
-        }, { writer, image:unsplashPictures||pictures, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
+        }, { publish:false,  writer, image:unsplashPictures||pictures, title, paragraphOne, paragraphTwo, paragraphThree, headingOne, headingTwo, headingThree, pointOne, pointTwo, pointThree, pointFour, pointFive, pointSix, pointSeven, pointEight, pointNine, pointTen, quoteOne, quoteTwo, quoteThree })
         res.status(StatusCodes.OK).json(singleArticle)
         
     } catch (error) {

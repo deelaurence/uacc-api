@@ -117,6 +117,9 @@ const ArticleSchema = new mongoose.Schema(
         publish: {
             type: Boolean,
             default: false,
+        },
+        aboutAuthor: {
+            type: String,
         }
 
     },
