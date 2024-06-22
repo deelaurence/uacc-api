@@ -7,6 +7,9 @@ const AuthorSchema = new mongoose.Schema(
             type: String,
             required: [true, "please provide author's name"],
         },
+        image:{
+            type:[String],
+        },
         description: {
             type: String,
             required: [true, "Provide author's details"]

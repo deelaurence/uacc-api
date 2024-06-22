@@ -1,12 +1,19 @@
 const Author = require("../models/Authors");
 
-// Create a new author
+const { uploadImagesToCloudinary } = require('../utils/uploadToCloudinary');
+
 exports.createAuthor = async (req, res) => {
     try {
-        const newAuthor = new Author(req.body);
+        const {name,description}=req.body
+        const newAuthor = new Author({name,description});
         const savedAuthor = await newAuthor.save();
-        res.status(201).json(savedAuthor);
+        if(req.body.images){
+            await uploadImagesToCloudinary(req.body.images, Author, savedAuthor._id);
+        }
+
+        res.status(400).json(savedAuthor);
     } catch (err) {
+        console.log(err)
         res.status(400).json({ error: err.message });
     }
 };
@@ -18,8 +25,14 @@ exports.editAuthor = async (req, res) => {
             new: true,
             runValidators: true,
         });
+
+
+
         if (!updatedAuthor) {
             return res.status(404).json({ error: "Author not found" });
+        }
+        if(req.body.images){
+            await uploadImagesToCloudinary(req.body.images, Author, updatedAuthor._id);
         }
         res.status(200).json(updatedAuthor);
     } catch (err) {
@@ -43,7 +56,9 @@ exports.deleteAuthor = async (req, res) => {
 // Get all authors
 exports.getAllAuthors = async (req, res) => {
     try {
-        const authors = await Author.find();
+        const authors = await Author.find({}).
+        sort({_id:-1});
+        console.log(authors)
         res.status(200).json(authors);
     } catch (err) {
         res.status(500).json({ error: err.message });
