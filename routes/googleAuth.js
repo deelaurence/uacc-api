@@ -33,9 +33,9 @@ passport.use(
                         {
                             name: profile.displayName,
                             email: profile.emails[0].value,
-                            // user_id: newUser._id,
                             provider: profile.provider,
                             subject: profile.id,
+                            verified: true,
                         }
                     );
 

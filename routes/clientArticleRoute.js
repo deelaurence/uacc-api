@@ -1,9 +1,8 @@
 const route = require("express").Router();
-const {
-    getArticles, getSingleArticle
-} = require("../controllers/article");
+const publicOnly = require("../middleware/public-only");
+const { getArticles, getSingleArticle } = require("../controllers/article");
 
-route.get('/all', getArticles)
-route.get('/:id', getSingleArticle)
+route.get("/all", publicOnly, getArticles);
+route.get("/:id", publicOnly, getSingleArticle);
 
-module.exports = route
+module.exports = route;

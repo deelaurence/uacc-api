@@ -45,7 +45,7 @@ AdminSchema.methods.comparePassword = async function (passwordInput) {
 };
 
 AdminSchema.methods.generateJWT = function (signature) {
-  return jwt.sign({ id: this._id, name: this.name }, signature);
+  return jwt.sign({ id: this._id, name: this.name, role: 'admin' }, signature, { expiresIn: '7d' });
 };
 // static method to login user
 

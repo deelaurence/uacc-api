@@ -6,12 +6,7 @@ const connectDB = (url) => {
   } else {
     console.log("connected to local database");
   }
-  return mongoose.connect(url, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true,
-  });
+  return mongoose.connect(url);
 };
 
 module.exports = connectDB;

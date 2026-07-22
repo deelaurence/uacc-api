@@ -112,6 +112,9 @@ const editPassword = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const ownerId = req.params.id;
+    if (req.decoded.id !== ownerId) {
+      throw new Unauthenticated("You can only delete your own account");
+    }
     const deleted = await User.findOneAndDelete(
       {
         _id: ownerId,

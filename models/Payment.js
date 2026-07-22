@@ -3,39 +3,42 @@ const mongoose = require('mongoose');
 const paymentSchema = new mongoose.Schema({
     owner: {
         type: String,
-        required: true
+        required: true,
     },
     amount: {
         type: Number,
-        required: true
+        required: true,
     },
     description: {
         type: String,
-        required: true
+        required: true,
     },
     reference: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     name: {
         type: String,
-        required: true
+        required: true,
     },
     date: {
         type: String,
-        required: true
+        required: true,
     },
     status: {
         type: String,
-        required: true
+        required: true,
     },
     id: {
         type: String,
-        required: true
-    }
+        required: true,
+    },
+    paystackAuthorization: {
+        type: String,
+    },
 });
 
 const Payment = mongoose.model('Payment', paymentSchema);
 
-
-module.exports = Payment 
+module.exports = Payment;

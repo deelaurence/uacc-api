@@ -166,6 +166,9 @@ const getSingleMessage = async (req, res) => {
         `no Message with id ${MessageId} `
       );
     }
+    if (req.publicOnly && !singleMessage.publish) {
+      throw new NotFound(`no Message with id ${MessageId} `);
+    }
     res.status(StatusCodes.OK).json(singleMessage);
   } catch (error) {
     console.log(error.message)
@@ -175,13 +178,13 @@ const getSingleMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
 
-    let query = {}
-    console.log(req.decoded)
-    //Requests coming from admin passses thru middleware
-    if (req.decoded) {
-      query = { owner: req.decoded.id }
+    let query = {};
+    if (req.publicOnly) {
+      query.publish = true;
     }
-
+    if (req.decoded) {
+      query = { owner: req.decoded.id };
+    }
 
     const allMessages = await Message.find(query)
       .sort({ createdAt: -1 })

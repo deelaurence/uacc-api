@@ -212,6 +212,9 @@ const getSingleArticle = async (req, res) => {
                 `no Article with id ${articleId} `
             );
         }
+        if (req.publicOnly && !singleArticle.publish) {
+            throw new NotFound(`no Article with id ${articleId} `);
+        }
         res.status(StatusCodes.OK).json(singleArticle);
     } catch (error) {
         console.log(error.message)
@@ -220,13 +223,13 @@ const getSingleArticle = async (req, res) => {
 };
 const getArticles = async (req, res) => {
     try {
-        let query = {}
-        console.log(req.decoded)
-        //Requests coming from admin passses thru middleware
-        if (req.decoded) {
-            query = { owner: req.decoded.id }
+        let query = {};
+        if (req.publicOnly) {
+            query.publish = true;
         }
-
+        if (req.decoded) {
+            query = { owner: req.decoded.id };
+        }
 
         const allArticles = await Article.find(query)
             .sort({ createdAt: -1 })

@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    // required: [true, "password cannot be empty"],
+    select: false,
     minlength: 6,
   },
   seedPhrase: {
@@ -70,7 +70,7 @@ UserSchema.pre("save", async function () {
   }
 });
 UserSchema.methods.generateJWT = function (signature) {
-  return jwt.sign({ id: this._id, name: this.name }, signature);
+  return jwt.sign({ id: this._id, name: this.name, role: 'user' }, signature, { expiresIn: '7d' });
 };
 UserSchema.methods.comparePassword = async function (passwordInput) {
   return await bcrypt.compare(passwordInput, this.password);

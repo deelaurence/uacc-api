@@ -18,21 +18,21 @@ const auth = async (req, res, next) => {
       throw new Unauthenticated("supply token");
     }
     const payload = jwt.verify(token || iosToken, process.env.JWT_SECRET);
-    req.decoded = { name: payload.name, id: payload.id };
+    if (payload.role && payload.role !== 'user') {
+      throw new Unauthenticated('Invalid user token');
+    }
+    req.decoded = { name: payload.name, id: payload.id, role: payload.role || 'user' };
     console.log('auth end, next')
     next();
 
   } catch (error) {
     console.log('auth error:' + error)
-    const { Message, statusCode } = error;
-    console.log(statusCode, Message);
+    const { message, statusCode } = error;
     if (statusCode) {
-      res.status(statusCode).json({ Message });
-      console.log(statusCode, Message);
+      res.status(statusCode).json({ message });
       return;
     }
-    res.status(StatusCodes.UNAUTHORIZED).json({ Message });
-    console.log(Message);
+    res.status(StatusCodes.UNAUTHORIZED).json({ message: message || 'Unauthorized' });
   }
 };
 

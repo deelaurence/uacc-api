@@ -1,15 +1,19 @@
 const route = require("express").Router();
-const authentication = require('../middleware/authentication')
+const AdminAuth = require("../middleware/admin-auth");
+const authentication = require("../middleware/authentication");
 const {
-    addArticle, editSingleArticle, getArticles, deleteSingleArticle, getSingleArticle
+  addArticle,
+  editSingleArticle,
+  getArticles,
+  deleteSingleArticle,
+  getSingleArticle,
 } = require("../controllers/article");
 
-route.post("/", authentication, addArticle);
-route.get("/:id",  getSingleArticle);
-route.put("/:id", authentication, editSingleArticle);
-route.delete("/:id", authentication, deleteSingleArticle);
+route.post("/", AdminAuth, addArticle);
 route.get("/all", getArticles);
-//admin
-route.get("/", getArticles);
+route.get("/:id", getSingleArticle);
+route.put("/:id", AdminAuth, editSingleArticle);
+route.delete("/:id", AdminAuth, deleteSingleArticle);
+route.get("/", AdminAuth, getArticles);
 
 module.exports = route;

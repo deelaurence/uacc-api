@@ -1,5 +1,6 @@
 const route = require("express").Router();
 const AdminAuth = require('../middleware/admin-auth')
+const superAdminAuth = require('../middleware/super-admin')
 const ArticleM = require('../models/ArticleM')
 const MessageM = require('../models/messageM')
 
@@ -7,12 +8,27 @@ const {getUsers,addPaymentTags,deletePaymentTag,getAllPaymentTags}=require('../c
 
 route.get('/users',AdminAuth,getUsers)
 route.post('/payment-tags',AdminAuth,addPaymentTags)
-route.get('/payment-tags',getAllPaymentTags)
-route.delete('/payment-tags/:id',AdminAuth,deletePaymentTag)
+route.get('/payment-tags', AdminAuth, getAllPaymentTags)
 
+route.get('/review/articles', AdminAuth, async (req, res) => {
+    try {
+        const articles = await ArticleM.find({}).sort({ createdAt: -1 });
+        res.json(articles);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
 
+route.get('/review/messages', AdminAuth, async (req, res) => {
+    try {
+        const messages = await MessageM.find({}).sort({ createdAt: -1 });
+        res.json(messages);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
 
-route.put('/publish/:id',async(req,res)=>{
+route.put('/publish/:id', superAdminAuth, async (req, res) => {
     try {
         const article = await ArticleM.findByIdAndUpdate(req.params.id,{publish:true})
         const message = await MessageM.findByIdAndUpdate(req.params.id,{publish:true})

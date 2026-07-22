@@ -52,10 +52,10 @@ const login = async (req, res) => {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
     res.cookie('admin_token', token, {
-      // maxAge: 5000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: true,
-      httpOnly: false,
-      sameSite: 'lax'
+      httpOnly: true,
+      sameSite: 'lax',
     });
 
 

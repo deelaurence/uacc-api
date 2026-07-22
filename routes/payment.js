@@ -1,15 +1,21 @@
-
-const auth=require("../middleware/authentication")
+const auth = require("../middleware/authentication");
 const route = require("express").Router();
-
 const {
-    chargePayment,
-    verifyPaymentCallback,
-    webhookVerification
+  chargePayment,
+  chargeGuestPayment,
+  verifyPaymentCallback,
+  verifyPaymentByReference,
+  getPublicPaymentTags,
+  getPaymentConfig,
+  getFeeEstimate,
 } = require("../controllers/payment");
 
+route.get("/tags", getPublicPaymentTags);
+route.get("/payment-config", getPaymentConfig);
+route.get("/fee-estimate", getFeeEstimate);
+route.post("/guest-initiate", chargeGuestPayment);
 route.post("/initiate", auth, chargePayment);
-route.post("/webhook", webhookVerification);
 route.get("/callback", verifyPaymentCallback);
+route.get("/verify/:reference", verifyPaymentByReference);
 
 module.exports = route;

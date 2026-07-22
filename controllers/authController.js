@@ -166,7 +166,7 @@ const login = async (req, res) => {
     if (!email || !password) {
       throw new BadRequest("email and password cannot be empty");
     }
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email }).select('+password');
     if (user && user.provider) {
       res.status(StatusCodes.CONFLICT)
         .json({ message: "You registered with a Google account" });
@@ -183,12 +183,11 @@ const login = async (req, res) => {
       throw new Unauthenticated("Verify your email")
     }
     const token = user.generateJWT(process.env.JWT_SECRET);
-    
-      // Set session storage for iOS devices
-      console.log("Setting session for iphone")
-      return res.status(StatusCodes.OK).json({ ...user._doc, token: token });
-    
-   
+    const userObject = user.toObject();
+    delete userObject.password;
+    delete userObject.seedPhrase;
+    delete userObject.authCode;
+    return res.status(StatusCodes.OK).json({ ...userObject, token });
   } catch (error) {
     const { message, statusCode } = error;
     console.log(statusCode, message);

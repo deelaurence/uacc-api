@@ -4,13 +4,7 @@ require("dotenv").config();
 const { Unauthenticated } = require("../errors/customErrors");
 
 const auth = async (req, res, next) => {
-  const yeso = true
-
   try {
-    if (req.url.includes("secret")) {
-      return next()
-    }
-
     let { authorization } = req.headers;
     if (!authorization ) {
       throw new Unauthenticated("supply token and Bearer");
@@ -28,7 +22,10 @@ const auth = async (req, res, next) => {
     }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.decoded = { name: payload.name, id: payload.id };
+    if (payload.role !== 'admin') {
+      throw new Unauthenticated('Admin access required');
+    }
+    req.decoded = { name: payload.name, id: payload.id, role: payload.role };
     console.log('admin auth end, next')
     next();
   } catch (error) {

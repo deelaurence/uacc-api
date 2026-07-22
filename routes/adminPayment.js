@@ -1,10 +1,11 @@
 const route = require("express").Router();
+const AdminAuth = require("../middleware/admin-auth");
 const {
-    getPayments, getSinglePayment
+  getPayments,
+  getSinglePayment,
 } = require("../controllers/payment");
 
-//admin
-route.get("/:id", getSinglePayment);
-route.get("/", getPayments);
+route.get("/:id", AdminAuth, getSinglePayment);
+route.get("/", AdminAuth, getPayments);
 
 module.exports = route;
