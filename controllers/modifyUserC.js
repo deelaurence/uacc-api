@@ -1,6 +1,5 @@
 require("dotenv").config();
 const User = require("../models/UserModel");
-const bcrypt = require('bcryptjs')
 const { StatusCodes } = require("http-status-codes");
 const {
   BadRequest,
@@ -65,50 +64,6 @@ const editNotification = async (req, res) => {
   }
 };
 
-const editPassword = async (req, res) => {
-  const seedPhrase = req.body.seedPhrase
-  try {
-    if (!req.body.password) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        Message: "password field cannot be empty"
-      })
-    }
-    if (!req.body.email) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        Message: "email field cannot be empty"
-      })
-    }
-    if (!req.body.seedPhrase) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        Message: "seed phrase field cannot be empty"
-      })
-    }
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt)
-
-    const edited = await User.findOneAndUpdate(
-      {
-        email: req.body.email,
-      },
-      { password: hashedPassword },
-      { new: true, runValidators: true }
-    );
-    if (!edited) {
-      throw new NotFound(
-        `Email not registered`
-      );
-    }
-    if (seedPhrase != edited.seedPhrase) {
-      throw new Unauthenticated(
-        `Seed phrase not correct`
-      );
-    }
-    return res.status(StatusCodes.OK).json({ Message: "Password Updated" });
-  }
-  catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ Message: error.Message })
-  }
-};
 const deleteUser = async (req, res) => {
   try {
     const ownerId = req.params.id;
@@ -152,4 +107,4 @@ const getUser = async (req, res) => {
     return res.status(StatusCodes.BAD_REQUEST).json({ Message: error.Message })
   }
 };
-module.exports = { editUser, deleteUser, editPassword, editNotification }
+module.exports = { editUser, deleteUser, editNotification }

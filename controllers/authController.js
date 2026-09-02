@@ -1,7 +1,6 @@
 require("dotenv").config();
 const User = require("../models/UserModel");
 const { StatusCodes } = require("http-status-codes");
-const { shuffle, seedArray } = require('../utils/seed-phrase')
 const generator = require('generate-serial-number')
 const serialNumber = generator.generate(1)
 const jwt = require('jsonwebtoken')
@@ -124,23 +123,32 @@ const verifiedEmailPasswordReset = async (req, res) => {
 
 const updatePassword = async (req, res) => {
   try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt)
-    const user = await User.findOne({ email: req.body.email })
-    if (!user.canResetPassword) {
-      throw new BadRequest("You need to verify email before resetting password!")
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw new BadRequest('email and password are required');
     }
-    const edited = await User.findOneAndUpdate(
-      {
-        email: req.body.email,
-      },
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new NotFound('User not found');
+    }
+    if (!user.canResetPassword) {
+      throw new BadRequest('You need to verify email before resetting password!');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await User.findOneAndUpdate(
+      { email },
       { password: hashedPassword, canResetPassword: false },
       { new: true, runValidators: true }
     );
-    res.json({ message: "Password Reset Successful" })
+
+    res.json({ message: 'Password Reset Successful' });
   } catch (error) {
-    console.error(error)
-    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message })
+    console.error(error);
+    const statusCode = error.statusCode || StatusCodes.BAD_REQUEST;
+    res.status(statusCode).json({ error: error.message });
   }
 }
 
@@ -185,7 +193,6 @@ const login = async (req, res) => {
     const token = user.generateJWT(process.env.JWT_SECRET);
     const userObject = user.toObject();
     delete userObject.password;
-    delete userObject.seedPhrase;
     delete userObject.authCode;
     return res.status(StatusCodes.OK).json({ ...userObject, token });
   } catch (error) {

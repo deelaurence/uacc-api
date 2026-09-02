@@ -33,10 +33,6 @@ const UserSchema = new mongoose.Schema({
     select: false,
     minlength: 6,
   },
-  seedPhrase: {
-    type: String,
-    default: "point-believe-twenty-open-rail-pool"
-  },
   authCode: {
     type: String
   },

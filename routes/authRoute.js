@@ -11,8 +11,6 @@ const {
   verifiedEmailPasswordReset,
   updatePassword,
 } = require("../controllers/authController");
-const { editPassword } = require("../controllers/modifyUserC");
-
 route.post("/login", login);
 route.post("/logout", logout);
 route.get("/verify-mail/:signature", verifyEmail);
@@ -21,6 +19,5 @@ route.get("/verify-mail-password-reset/:signature", verifiedEmailPasswordReset);
 route.put("/update-password", updatePassword);
 route.get("/delete/:email", AdminAuth, deleteUser);
 route.post("/register", register);
-route.put("/edit-password", editPassword);
 
 module.exports = route;
